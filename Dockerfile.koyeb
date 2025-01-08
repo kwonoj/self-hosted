@@ -1,0 +1,18 @@
+FROM koyeb/docker-compose
+
+ARG TEST_KEY
+
+RUN if [ -z "$TEST_KEY" ]; then \
+        echo "Error: test_key environment variable is not set" && exit 1; \
+    fi && \
+    mkdir -p /config && \
+    printf "%s" "$TEST_KEY" > /config/key.pem && \
+    chmod 600 /config/key.pem
+
+COPY docker-compose.yml /docker-compose.yml
+
+RUN apk add --no-cache docker-compose
+RUN cat /docker-compose.yml
+RUN docker-compose -f /docker-compose.yml -p test pull
+
+COPY . /app
